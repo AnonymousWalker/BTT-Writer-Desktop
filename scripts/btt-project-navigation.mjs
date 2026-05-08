@@ -6,7 +6,7 @@
 const CDP_HOST = process.env.BTT_CDP_HOST || "127.0.0.1";
 const CDP_PORT = Number(process.env.BTT_CDP_PORT || "9222");
 const CHUNK_REF = process.env.BTT_CHUNK_REF || "Philemon 1:14–16";
-const EDIT_TEXT = "Nhưng tôi không muốn làm bất cứ điều gì mà không có sự ưng thuận của anh. Tôi làm điều này để bất kỳ việc tốt nào được thực hiện đều không phải do tôi ép buộc anh, nhưng vì anh muốn làm điều đó. Có lẽ lý do cậu ấy bị chia cắt khỏi anh trong một khoảng thời gian, là để anh có thể có lại cậu ấy mãi mãi. Để cậu ta không còn như một nô lệ nữa, nhưng còn hơn cả một nô lệ, như là một anh em yêu dấu, đặc biệt là với tôi và sẽ càng yêu dấu cho anh hơn nữa, cả trong xác thịt lẫn trong Chúa.";
+const EDIT_TEXT = "\\v 14 Nhưng tôi không muốn làm bất cứ điều gì mà không có sự ưng thuận của anh. Tôi làm điều này để bất kỳ việc tốt nào được thực hiện đều không phải do tôi ép buộc anh, nhưng vì anh muốn làm điều đó. \\v 15 Có lẽ lý do cậu ấy bị chia cắt khỏi anh trong một khoảng thời gian, là để anh có thể có lại cậu ấy mãi mãi. \\v 16 Để cậu ta không còn như một nô lệ nữa, nhưng còn hơn cả một nô lệ, như là một anh em yêu dấu, đặc biệt là với tôi và sẽ càng yêu dấu cho anh hơn nữa, cả trong xác thịt lẫn trong Chúa.";
 
 if (typeof fetch !== "function") {
   throw new Error("Global fetch is required. Run with Node 20+.");
