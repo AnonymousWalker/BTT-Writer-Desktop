@@ -353,6 +353,65 @@ function clickDoneIconExpr() {
   `;
 }
 
+function clickMarkChunkDoneToggleExpr(chunkRef) {
+  const target = escapeForTemplate(chunkRef);
+  return `
+    (function () {
+      function normalizeRef(text) {
+        return (text || "")
+          .replace(/[\\u2010-\\u2015]/g, "-")
+          .replace(/\\s+/g, " ")
+          .trim()
+          .toLowerCase();
+      }
+
+      const wanted = normalizeRef(${target});
+      const reviewList = document.querySelector("iron-list#reviewlist");
+      if (!reviewList) return "NO_REVIEW_LIST";
+
+      const cards = reviewList.querySelectorAll("ts-review-card");
+      for (const card of cards) {
+        const review = card.querySelector("ts-target-review");
+        if (!review) continue;
+        const heading = review.querySelector("#heading");
+        if (!heading) continue;
+        const spans = heading.querySelectorAll("span");
+        if (!spans.length) continue;
+        const headingText = Array.from(spans).map((s) => s.textContent || "").join("");
+        const normalized = normalizeRef(headingText);
+        if (!(normalized === wanted || normalized.includes(wanted))) continue;
+
+        const toggle = review.querySelector("paper-toggle-button#toggle");
+        if (!toggle) return "NO_TOGGLE";
+        const rect = toggle.getBoundingClientRect();
+        if (rect.width <= 0 || rect.height <= 0) return "TOGGLE_NOT_VISIBLE";
+        toggle.click();
+        return "CLICKED";
+      }
+
+      return "CHUNK_NOT_VISIBLE";
+    })()
+  `;
+}
+
+function clickVisibleDialogConfirmExpr() {
+  return `
+    (function () {
+      const buttons = Array.from(document.querySelectorAll("paper-button[dialog-confirm]"));
+      if (!buttons.length) return "NOT_FOUND";
+
+      const visible = buttons.find((btn) => {
+        const rect = btn.getBoundingClientRect();
+        return rect.width > 0 && rect.height > 0;
+      });
+      if (!visible) return "NOT_VISIBLE";
+
+      visible.click();
+      return "CLICKED";
+    })()
+  `;
+}
+
 async function waitForChunkRefVisibleWithScroll(evaluate, chunkRef, timeoutMs = 45000) {
   const start = Date.now();
   let lastState = "UNKNOWN";
@@ -456,7 +515,29 @@ async function run() {
     await waitForChunkRefVisibleWithScroll(evaluate, CHUNK_REF, 45000);
     await waitForVerseMarkerInChunk(evaluate, CHUNK_REF, 15, 20000);
     printStep("verse-marker", "15");
-    console.log("[chunk-nav] PASS: chunk navigation + edit + done completed.");
+    await sleep(1000);
+
+    await waitForEvalState(
+      evaluate,
+      () => clickMarkChunkDoneToggleExpr(CHUNK_REF),
+      "CLICKED",
+      15000,
+      "Failed to click mark-chunk-done toggle"
+    );
+    printStep("mark-chunk-done", "clicked");
+
+    await sleep(1000);
+
+    await waitForEvalState(
+      evaluate,
+      clickVisibleDialogConfirmExpr,
+      "CLICKED",
+      15000,
+      "Failed to click dialog confirm button"
+    );
+    printStep("dialog-confirm", "clicked");
+
+    console.log("[chunk-nav] PASS: chunk navigation + edit + done + toggle + confirm completed.");
   } finally {
     ws.close();
   }
